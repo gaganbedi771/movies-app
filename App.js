@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 
 import MoviesList from "./components/MoviesList";
 import "./App.css";
@@ -9,7 +9,14 @@ function App() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  async function fetchMovies() {
+  useEffect(() => {
+    fetchMovies();
+    return () => {
+      clearTimeout(retryTimer);
+    };
+  }, []);
+
+  const fetchMovies = useCallback(async () => {
     try {
       setIsLoading(true);
       setError(null);
@@ -31,7 +38,6 @@ function App() {
       });
       console.log(transformedMovies);
       setMovies(transformedMovies);
-      setIsLoading(false);
     } catch (error) {
       console.log(error);
       setError(error.message);
@@ -39,9 +45,10 @@ function App() {
       retryTimer = setTimeout(() => {
         fetchMovies();
       }, 5000);
+    } finally {
+      setIsLoading(false);
     }
-    setIsLoading(false);
-  }
+  },[]);
 
   function cancelRetryHandler() {
     clearTimeout(retryTimer);
