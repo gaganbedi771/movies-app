@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useState } from "react";
 
 import MoviesList from "./components/MoviesList";
 import "./App.css";
+import AddMovies from "./components/AddMovies";
 let retryTimer;
 
 function App() {
@@ -27,7 +28,6 @@ function App() {
       }
 
       const data = await respnse.json();
-      console.log(data);
       const transformedMovies = data.map((movieData) => {
         return {
           id: movieData.episode_id,
@@ -36,7 +36,6 @@ function App() {
           releaseDate: movieData.release_date,
         };
       });
-      console.log(transformedMovies);
       setMovies(transformedMovies);
     } catch (error) {
       console.log(error);
@@ -48,7 +47,7 @@ function App() {
     } finally {
       setIsLoading(false);
     }
-  },[]);
+  }, []);
 
   function cancelRetryHandler() {
     clearTimeout(retryTimer);
@@ -58,6 +57,9 @@ function App() {
 
   return (
     <React.Fragment>
+      <section>
+        <AddMovies></AddMovies>
+      </section>
       <section>
         <button onClick={fetchMovies}>Fetch Movies</button>
       </section>
