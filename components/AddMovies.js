@@ -1,14 +1,19 @@
 import React from "react";
 import "./AddMovies.css";
 
-const AddMovies = () => {
+const AddMovies = (props) => {
   const [title, setTitle] = React.useState("");
   const [releaseDate, setReleaseDate] = React.useState("");
   const [openingText, setOpeningText] = React.useState("");
 
   const submitHandler = (event) => {
     event.preventDefault();
-    console.log(title, releaseDate, openingText);
+    const newMovie = {
+      title: title,
+      releaseDate: releaseDate,
+      openingText: openingText,
+    };
+    props.onAddMovie(newMovie);
     setTitle("");
     setReleaseDate("");
     setOpeningText("");

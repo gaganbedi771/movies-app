@@ -22,20 +22,26 @@ function App() {
       setIsLoading(true);
       setError(null);
 
-      const respnse = await fetch("https://swapi.info/api/films");
-      if (respnse.ok === false) {
+      const response = await fetch(
+        "https://react-http-c4f8c-default-rtdb.firebaseio.com/movies.json",
+      );
+      if (response.ok === false) {
         throw new Error("Something went wrong! Retrying");
       }
 
-      const data = await respnse.json();
-      const transformedMovies = data.map((movieData) => {
-        return {
-          id: movieData.episode_id,
-          title: movieData.title,
-          openingText: movieData.opening_crawl,
-          releaseDate: movieData.release_date,
-        };
-      });
+      const data = await response.json();
+
+      const transformedMovies = [];
+
+      for (const key in data) {
+        transformedMovies.push({
+          id: key,
+          title: data[key].title,
+          openingText: data[key].openingText,
+          releaseDate: data[key].releaseDate,
+        });
+      }
+
       setMovies(transformedMovies);
     } catch (error) {
       console.log(error);
@@ -55,16 +61,57 @@ function App() {
     setError("Retry cancelled.");
   }
 
+  const addMovieHandler = async (movie) => {
+    try {
+      const response = await fetch(
+        "https://react-http-c4f8c-default-rtdb.firebaseio.com/movies.json",
+        {
+          method: "POST",
+          body: JSON.stringify(movie),
+          headers: {
+            "Content-Type": "application/json",
+          },
+        },
+      );
+
+      console.log(response);
+
+      const data = await response.json();
+      console.log(data);
+      setMovies((prevMovies) => {
+        return [...prevMovies, data];
+      });
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const deleteMovieHandler = async (id) => {
+    try {
+      const response = await fetch(
+        `https://react-http-c4f8c-default-rtdb.firebaseio.com/movies/${id}.json`,
+        {
+          method: "DELETE",
+        },
+      );
+      setMovies((prevMovies) => {
+        return prevMovies.filter((movie) => movie.id !== id);
+      });
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   return (
     <React.Fragment>
       <section>
-        <AddMovies></AddMovies>
+        <AddMovies onAddMovie={addMovieHandler}></AddMovies>
       </section>
       <section>
         <button onClick={fetchMovies}>Fetch Movies</button>
       </section>
       <section>
-        {!isLoading && movies.length > 0 && <MoviesList movies={movies} />}
+        {!isLoading && movies.length > 0 && <MoviesList movies={movies} onDeleteMovie={deleteMovieHandler} />}
         {!isLoading && movies.length == 0 && !error && <p>Found no movies.</p>}
         {!isLoading && error && (
           <>
